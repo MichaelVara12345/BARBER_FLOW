@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List; 
+
 @Entity
 @Table(name = "barberos")
 @Data
@@ -29,4 +30,16 @@ public class Barbero {
     @CollectionTable(name = "barberos_horarios", joinColumns = @JoinColumn(name = "barbero_id"))
     @Column(name = "horario")
     private List<String> horarios;
+
+    // --- NUEVA RELACIÓN AÑADIDA ---
+    // Muchos barberos pueden pertenecer a una sola barbería
+    @ManyToOne
+    @JoinColumn(name = "barberia_id")
+    private Barberia barberia;
+
+    @OneToOne
+    @JoinColumn(name = "usuario_id", unique = true)
+    private Usuario usuario;
+ 
+    
 }
