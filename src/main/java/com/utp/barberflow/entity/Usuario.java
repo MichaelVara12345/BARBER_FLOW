@@ -30,4 +30,8 @@ public class Usuario {
 
     @Column(nullable = false, length = 20)
     private String rol; 
+
+    @ManyToOne
+    @JoinColumn(name = "barberia_id")
+    private Barberia barberia;
 }

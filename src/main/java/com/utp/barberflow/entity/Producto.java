@@ -26,4 +26,14 @@ public class Producto {
     private Double precio;
 
     private Integer stock;
+
+    @Column(length = 100)
+    private String categoria;
+ 
+    @Column(columnDefinition = "LONGTEXT")
+    private String imagen;
+    
+    @ManyToOne
+    @JoinColumn(name = "barberia_id")
+    private Barberia barberia;
 }
