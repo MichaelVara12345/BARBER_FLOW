@@ -16,4 +16,20 @@ public class BarberiaService {
     public List<Barberia> obtenerTodas() {
         return barberiaRepository.findAll();
     }
+    public Barberia obtenerPorId(Long id) {
+        return barberiaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Barbería no encontrada"));
+    }
+
+    public Barberia actualizarBarberia(Long id, Barberia datosNuevos) {
+        Barberia barberia = obtenerPorId(id);
+        barberia.setNombre(datosNuevos.getNombre());
+        barberia.setCategoria(datosNuevos.getCategoria());
+        barberia.setDireccion(datosNuevos.getDireccion());
+        barberia.setTelefono(datosNuevos.getTelefono());
+        barberia.setDescripcion(datosNuevos.getDescripcion());
+        barberia.setImagen(datosNuevos.getImagen()); // Guardamos la nueva foto
+        
+        return barberiaRepository.save(barberia);
+    }
 }

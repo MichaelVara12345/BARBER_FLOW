@@ -71,4 +71,31 @@ public class BarberoService {
     public void eliminarBarbero(Long id) {
         barberoRepository.deleteById(id);
     }
+    
+    @Transactional
+    public Barbero actualizarBarbero(Long id, BarberoRegistroDTO dto) {
+        // 1. Buscamos el barbero que ya existe en la BD
+        Barbero barbero = barberoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Barbero no encontrado"));
+
+        // 2. Actualizamos los datos del perfil público
+        barbero.setNombre(dto.getNombre());
+        barbero.setEspecialidad(dto.getEspecialidad());
+        barbero.setDescripcion(dto.getDescripcion());
+        barbero.setHorarios(dto.getHorarios());
+
+        // 3. Buscamos y actualizamos su cuenta de Usuario asociada
+        Usuario usuario = barbero.getUsuario();
+        usuario.setNombre(dto.getNombre());
+        usuario.setTelefono(dto.getTelefono());
+        // El email generalmente no se actualiza porque es el "usuario" de login, pero puedes añadirlo si lo deseas
+
+        // Si el admin escribió una contraseña nueva, la encriptamos y la cambiamos
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        usuarioRepository.save(usuario);
+        return barberoRepository.save(barbero);
+    }
 }

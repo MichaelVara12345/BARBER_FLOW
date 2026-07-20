@@ -1,0 +1,40 @@
+name: BarberFlow Backend CI/CD
+
+# El flujo se dispara automáticamente en cada Push o Pull Request a la rama main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    #Descargara el codigo fuente del repositorio
+    - name: 1. Checkout del código fuente
+      uses: actions/checkout@v4
+
+    #Configurara el entorno de Java (JDK 17)
+    - name: 2. Configurar JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven 
+
+    #Compilara el proyecto y ejecutara las pruebas automatizadas
+    - name: 3. Compilar y Ejecutar Pruebas Unitarias
+      run: mvn clean test
+
+    #Empaquetar la aplicación en un archivo ejecutable .jar
+    - name: 4. Empaquetar Aplicación (.jar)
+      run: mvn package -DskipTests
+
+    #Guardara el archivo compilado en GitHub como un artefacto descargable
+    - name: 5. Subir Artefacto Compilado
+      uses: actions/upload-artifact@v4
+      with:
+        name: barberflow-backend-executable
+        path: target/*.jar

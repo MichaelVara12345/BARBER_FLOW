@@ -23,6 +23,19 @@ public class BarberoController {
     public List<Barbero> listarBarberos() {
         return barberoService.obtenerTodos();
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> actualizarEmpleado(@PathVariable Long id, @RequestBody BarberoRegistroDTO dto) {
+        Map<String, String> respuesta = new HashMap<>();
+        try {
+            barberoService.actualizarBarbero(id, dto);
+            respuesta.put("mensaje", "Empleado actualizado con éxito");
+            return ResponseEntity.ok(respuesta);
+        } catch (Exception e) {
+            e.printStackTrace();
+            respuesta.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(respuesta);
+        }
+    }
 
     @GetMapping("/barberia/{barberiaId}")
     public ResponseEntity<List<Barbero>> obtenerBarberosPorBarberia(@PathVariable Long barberiaId) {

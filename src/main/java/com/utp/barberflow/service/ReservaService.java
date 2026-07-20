@@ -8,7 +8,9 @@ import com.utp.barberflow.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -190,5 +192,59 @@ private com.utp.barberflow.repository.UsuarioRepository usuarioRepository;
         }
     }
     
+    // --- GENERACIÓN DE REPORTE EXCEL (APACHE POI) ---
+    public byte[] generarReporteCitasExcel(Long barberoId) throws Exception {
+        // Obtener la lista de citas del barbero
+        List<Reserva> citas = reservaRepository.findByBarberoId(barberoId);
+
+        // Crear un libro de Excel en blanco y una hoja
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Mis Citas - BarberFlow");
+
+        // Encabezados
+        Row headerRow = sheet.createRow(0);
+        String[] columnas = {"ID Reserva", "Nombre Cliente", "Teléfono", "Fecha", "Hora", "Estado"};
+        
+        // Estilo para el encabezado
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+
+        for (int i = 0; i < columnas.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(columnas[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        //Llenar los datos de las citas en las filas siguientes
+        int rowIdx = 1;
+        for (Reserva cita : citas) {
+            Row row = sheet.createRow(rowIdx++);
+            row.createCell(0).setCellValue(cita.getId());
+            
+            // Validaciones por si el usuario es nulo
+            String nombreCliente = (cita.getUsuario() != null && cita.getUsuario().getNombre() != null) ? cita.getUsuario().getNombre() : "Anónimo";
+            String telefonoCliente = (cita.getUsuario() != null && cita.getUsuario().getTelefono() != null) ? cita.getUsuario().getTelefono() : "S/N";
+            
+            row.createCell(1).setCellValue(nombreCliente);
+            row.createCell(2).setCellValue(telefonoCliente);
+            row.createCell(3).setCellValue(cita.getFecha().toString());
+            row.createCell(4).setCellValue(cita.getHora());
+            row.createCell(5).setCellValue(cita.getEstado());
+        }
+
+        // ajustar el tamaño de las columnas automáticamente
+        for (int i = 0; i < columnas.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        //Convertir el archivo Excel a un arreglo de bytes para enviarlo por HTTP
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+
+        return outputStream.toByteArray();
+    }
     
 }

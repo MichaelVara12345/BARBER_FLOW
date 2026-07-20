@@ -7,6 +7,8 @@ import com.utp.barberflow.service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ public class ReservaController {
 
     @Autowired
     private ReservaService reservaService;
+    
 
     @PostMapping
     public ResponseEntity<Map<String, String>> crearReserva(@RequestBody ReservaRequest request) {
@@ -72,5 +75,21 @@ public class ReservaController {
             @RequestParam String fecha) {
         return ResponseEntity.ok(reservaService.obtenerHorariosDisponibles(barberoId, java.time.LocalDate.parse(fecha)));
     }
-    
+    @GetMapping("/barbero/{barberoId}/exportar")
+    public ResponseEntity<byte[]> exportarCitasExcel(@PathVariable Long barberoId) {
+        try {
+            byte[] excelContent = reservaService.generarReporteCitasExcel(barberoId);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "Reporte_Citas_Barbero_" + barberoId + ".xlsx");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelContent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

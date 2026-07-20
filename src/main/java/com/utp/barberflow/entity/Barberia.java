@@ -30,4 +30,7 @@ public class Barberia {
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String imagen;
 }
